@@ -5,9 +5,10 @@ import numpy as np
 from tensorflow.keras.models import load_model
 
 st.title("Attention Monitoring")
-st.write('''Fine-tuned the top layers of a pre-trained ResNet-12 model to
-accurately classify images, videos and live feed.''')
-st.write('''See blog for more information: 
+st.write('''Hi! I'm Tyrone! I fine-tuned the top layers of a pre-trained ResNet-152 model
+in order to model to accurately classify images, videos and live feed.
+"To classify what?" you might ask. Whether or not you are paying attention''')
+st.write('''See my blog for more information: 
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
@@ -27,7 +28,7 @@ def video_labeler(vid_file, vid_name, model):
     writer = None
     frame_width = frame_height = None
     classes = ['ATTENTIVE', 'NOT ATTENTIVE']
-    VIDEO_OUT = "videos/out/"
+    VIDEO_OUT = "../videos/out/"
     VIDEO_NAME=vid_name
     stframe = st.empty()
     count = 0
@@ -90,8 +91,8 @@ def video_labeler(vid_file, vid_name, model):
     # Close all windows
     cv.destroyAllWindows()
 
-vid_file = st.file_uploader("Upload the video you want labeled.","mp4")
-model_dir = './resnet152v2/model2'
+vid_file = st.file_uploader("Upload the video you want classified.","mp4")
+model_dir = '../resnet152v2/model2'
 
 if vid_file:
     st.video(vid_file)
