@@ -7,8 +7,8 @@ from tensorflow.keras.models import load_model
 
 st.title("Attention Monitoring")
 st.write('''Hi! I'm Tyrone! I fine-tuned the top layers of a pre-trained ResNet-152 model
-in order to model to accurately classify images, videos and live feed.
-"To classify what?" you might ask. Whether or not you are paying attention''')
+in order to accurately classify images, videos and live feed.
+"Classifying for what exactly...?" you might ask. Whether or not you are paying attention.''')
 st.write('''See my blog for more information: 
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
 
