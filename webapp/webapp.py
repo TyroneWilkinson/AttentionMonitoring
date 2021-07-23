@@ -65,7 +65,6 @@ def video_labeler(vid_file, vid_name, model, frame_num):
         cv.putText(output, text, org, font, fontScale, color, thickness)
 
         # Show output images
-        cv.imshow("Output", output)
         stframe.image(output, channels='BGR')
         
         # Captures every 15th frame (for speed)
@@ -81,21 +80,10 @@ def video_labeler(vid_file, vid_name, model, frame_num):
 vid_file = st.file_uploader("Upload the video you want classified.","mp4")
 model_location = "https://drive.google.com/uc?id=1gUsVPU65Dd-DGoOgF-lwW9w_AEja1OE_&export=download"
 
-# def test():      
-#     vid_cv = tempfile.NamedTemporaryFile(delete=False)
-#     vid_cv.write(vid_file.read())
-#     vid_name = vid_cv.name
-#     vid_cv = cv.VideoCapture(vid_cv.name)
-#     model=model_loader(model_location)
-#     video_labeler(vid_cv, vid_name, model)
-    
-#     if st.button("Rerun Classification"):
-#         st.script_request_queue.RerunData(None)
-
 if vid_file:
     st.video(vid_file)
-    frame_num = st.number_input(label='''The model will label every nth frame.
-    Enter a value between 1 and 15 inclusive.''',
+    frame_num = st.number_input(label='''The model will only label every nth frame.
+    Enter a value between 1 and 15 inclusive (I would start with 15).''',
                              min_value=0,
                              max_value=15,
                              value=0)
