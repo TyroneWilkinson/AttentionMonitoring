@@ -12,11 +12,6 @@ in order to model to accurately classify images, videos and live feed.
 st.write('''See my blog for more information: 
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
 
-# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-# def model_loader(model_location):
-#     new_location = gdown.cached_download(model_location)
-#     return load_model(new_location)
-
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def model_loader(model_location):
     tmp = tempfile.NamedTemporaryFile(delete=False)
@@ -73,9 +68,6 @@ def video_labeler(vid_file, vid_name, model, frame_num):
 
     # Release the file pointers
     vid_file.release()
-
-    # Close all windows
-    cv.destroyAllWindows()
 
 vid_file = st.file_uploader("Upload the video you want classified.","mp4")
 model_location = "https://drive.google.com/uc?id=1gUsVPU65Dd-DGoOgF-lwW9w_AEja1OE_&export=download"
