@@ -12,10 +12,16 @@ in order to model to accurately classify images, videos and live feed.
 st.write('''See my blog for more information: 
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
 
+# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
+# def model_loader(model_location):
+#     new_location = gdown.cached_download(model_location)
+#     return load_model(new_location)
+
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def model_loader(model_location):
-    new_location = gdown.cached_download(model_location)
-    return load_model(new_location)
+    tmp = tempfile.NamedTemporaryFile(delete=False)
+    _ = gdown.download(model_location,tmp)
+    return load_model(tmp.name)
 
 def video_labeler(vid_file, vid_name, model, frame_num):
     frame_width = frame_height = None
@@ -75,16 +81,16 @@ def video_labeler(vid_file, vid_name, model, frame_num):
 vid_file = st.file_uploader("Upload the video you want classified.","mp4")
 model_location = "https://drive.google.com/uc?id=1gUsVPU65Dd-DGoOgF-lwW9w_AEja1OE_&export=download"
 
-def test():      
-    vid_cv = tempfile.NamedTemporaryFile(delete=False)
-    vid_cv.write(vid_file.read())
-    vid_name = vid_cv.name
-    vid_cv = cv.VideoCapture(vid_cv.name)
-    model=model_loader(model_location)
-    video_labeler(vid_cv, vid_name, model)
+# def test():      
+#     vid_cv = tempfile.NamedTemporaryFile(delete=False)
+#     vid_cv.write(vid_file.read())
+#     vid_name = vid_cv.name
+#     vid_cv = cv.VideoCapture(vid_cv.name)
+#     model=model_loader(model_location)
+#     video_labeler(vid_cv, vid_name, model)
     
-    if st.button("Rerun Classification"):
-        st.script_request_queue.RerunData(None)
+#     if st.button("Rerun Classification"):
+#         st.script_request_queue.RerunData(None)
 
 if vid_file:
     st.video(vid_file)
