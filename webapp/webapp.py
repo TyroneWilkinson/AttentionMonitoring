@@ -2,6 +2,7 @@ import streamlit as st
 import cv2 as cv
 import tempfile
 import numpy as np
+import gdown
 from tensorflow.keras.models import load_model
 
 st.title("Attention Monitoring")
@@ -12,24 +13,13 @@ st.write('''See my blog for more information:
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def model_loader(location):
-    # location: './resnet152v2/model2'
-    return load_model(location)
+def model_loader(model_location):
+    new_location = gdown.cached_download(model_location)
+    return load_model(new_location)
 
-def file_checker(vid_file):  
-    cap = cv.VideoCapture(vid_file)
-    if not cap.isOpened():
-        st.write("Cannot open camera")
-        exit()
-        return None
-    return cap
-
-def video_labeler(vid_file, vid_name, model):
-    writer = None
+def video_labeler(vid_file, vid_name, model, frame_num):
     frame_width = frame_height = None
     classes = ['ATTENTIVE', 'NOT ATTENTIVE']
-    VIDEO_OUT = "../videos/out/"
-    VIDEO_NAME=vid_name
     stframe = st.empty()
     count = 0
     # Loop over frames from the video stream
@@ -59,7 +49,6 @@ def video_labeler(vid_file, vid_name, model):
         preds = 0 if percent_pred < 99 else 1
         label = classes[preds]    
         
-
         # Write the label on the output frame
         text = f"{label}"
         org = (35, 50)
@@ -69,36 +58,52 @@ def video_labeler(vid_file, vid_name, model):
         thickness = 3
         cv.putText(output, text, org, font, fontScale, color, thickness)
 
-        # Check if videowriter is None
-        if writer is None:
-            # Define the codec and create VideoWriter object
-            fourcc = cv.VideoWriter_fourcc(*"DIVX")
-            writer = cv.VideoWriter(VIDEO_OUT+VIDEO_NAME, fourcc, 30,
-                (frame_width, frame_height), True)
-
         # Show output images
         cv.imshow("Output", output)
-        stframe.image(output)
+        stframe.image(output, channels='BGR')
         
         # Captures every 15th frame (for speed)
-        count += 15
+        count += frame_num
         vid_file.set(cv.CAP_PROP_POS_FRAMES, count)
 
-    # Rrelease the file pointers
+    # Release the file pointers
     vid_file.release()
-    writer.release()
 
     # Close all windows
     cv.destroyAllWindows()
 
 vid_file = st.file_uploader("Upload the video you want classified.","mp4")
-model_dir = '../resnet152v2/model2'
+model_location = "https://drive.google.com/uc?id=1gUsVPU65Dd-DGoOgF-lwW9w_AEja1OE_&export=download"
 
-if vid_file:
-    st.video(vid_file)
+def test():      
     vid_cv = tempfile.NamedTemporaryFile(delete=False)
     vid_cv.write(vid_file.read())
     vid_name = vid_cv.name
     vid_cv = cv.VideoCapture(vid_cv.name)
-    model=model_loader(model_dir)
+    model=model_loader(model_location)
     video_labeler(vid_cv, vid_name, model)
+    
+    if st.button("Rerun Classification"):
+        st.script_request_queue.RerunData(None)
+
+if vid_file:
+    st.video(vid_file)
+    frame_num = st.number_input(label='''The model will label every nth frame.
+    Enter a value between 1 and 15 inclusive.''',
+                             min_value=0,
+                             max_value=15,
+                             value=0)
+    
+    if frame_num > 0 and frame_num <= 15:
+        vid_cv = tempfile.NamedTemporaryFile(delete=False)
+        vid_cv.write(vid_file.read())
+        vid_name = vid_cv.name
+        vid_cv = cv.VideoCapture(vid_cv.name)
+        model=model_loader(model_location)
+        video_labeler(vid_cv, vid_name, model, frame_num)
+        
+        if st.button("Click to rerun classification (or change frame value above to rerun)"):
+            st.script_request_queue.RerunData(None)
+
+
+
