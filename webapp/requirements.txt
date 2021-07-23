@@ -1,4 +1,5 @@
 numpy
 streamlit
+gdown
 openCV-python-headless
 tensorflow
