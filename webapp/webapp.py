@@ -6,11 +6,13 @@ import gdown
 from tensorflow.keras.models import load_model
 
 st.title("Attention Monitoring")
-st.write('''Hi! I'm Tyrone! I fine-tuned the top layers of a pre-trained ResNet-152 model
-in order to accurately classify images, videos and live feed.
+st.write('''Hi! I fine-tuned the top layers of a pre-trained ResNet-152 model
+in order to classify images, videos and live feed.
 "Classifying for what exactly...?" you might ask. Whether or not you are paying attention.''')
 st.write('''See my blog for more information: 
 https://nycdatascience.com/blog/student-works/attention-monitoring/''') 
+st.write('''If you upload a video below it will classify whether or not the subject
+is paying attention AND it will output an "Attentive Score". Give it a try!''')
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def model_loader(model_location):
@@ -23,6 +25,7 @@ def video_labeler(vid_file, vid_name, model, frame_num):
     classes = ['ATTENTIVE', 'NOT ATTENTIVE']
     stframe = st.empty()
     count = 0
+    score = {0:0, 1:0}
     # Loop over frames from the video stream
     while True:
         # Capture frame-by-frame
@@ -32,11 +35,8 @@ def video_labeler(vid_file, vid_name, model, frame_num):
         # reached the end of the video
         if not is_present:
             st.write("Video classification is complete.")
+            st.write(f"Your final score is: {current_score:.3f}%!")
             break
-
-        # Get frame dimensions if empty
-        if frame_width is None or frame_height is None:
-            frame_width, frame_height = frame.shape[:2]
 
         # Operations on the frame: Convert, Resize, Rescale
         output = frame.copy()
@@ -50,8 +50,12 @@ def video_labeler(vid_file, vid_name, model, frame_num):
         preds = 0 if percent_pred < 99 else 1
         label = classes[preds]    
         
+        # Calculate score
+        score[preds] += 1 
+        current_score = score[0]/(score[0]+score[1])*100
+        
         # Write the label on the output frame
-        text = f"{label}"
+        text = f'''{label}    Your attentive score is: {current_score:.3f}%'''
         org = (35, 50)
         font = cv.FONT_HERSHEY_DUPLEX
         fontScale = 1.25
@@ -71,11 +75,11 @@ def video_labeler(vid_file, vid_name, model, frame_num):
 
 vid_file = st.file_uploader("Upload the video you want classified.","mp4")
 model_location = "https://drive.google.com/uc?id=1gUsVPU65Dd-DGoOgF-lwW9w_AEja1OE_&export=download"
-
+label = '''The model will only label every nth frame.
+    Enter a value between 1 and 15 inclusive (speed vs accuracy).'''
 if vid_file:
     st.video(vid_file)
-    frame_num = st.number_input(label='''The model will only label every nth frame.
-    Enter a value between 1 and 15 inclusive (I would start with 15).''',
+    frame_num = st.number_input(label=label,
                              min_value=0,
                              max_value=15,
                              value=0)
